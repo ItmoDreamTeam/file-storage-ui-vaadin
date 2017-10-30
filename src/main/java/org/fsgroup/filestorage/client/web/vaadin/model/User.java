@@ -14,4 +14,12 @@ public class User extends BaseEntity {
     public List<UploadedFile> getFiles() {
         return files;
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + getId() + ", " +
+                "username='" + username + '\'' +
+                '}';
+    }
 }

@@ -4,6 +4,7 @@ import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
+import org.apache.log4j.Logger;
 import org.fsgroup.filestorage.client.web.vaadin.security.UserCredentials;
 import org.fsgroup.filestorage.client.web.vaadin.service.RequestResults;
 import org.fsgroup.filestorage.client.web.vaadin.service.UserService;
@@ -15,6 +16,8 @@ import javax.annotation.Resource;
 @UIScope
 @SpringComponent
 public class SignUpForm extends VerticalLayout {
+
+    private static final Logger log = Logger.getLogger(SignUpForm.class);
 
     @Resource
     private UserService userService;
@@ -55,9 +58,19 @@ public class SignUpForm extends VerticalLayout {
             return;
         }
         RequestResults<?> requestResults = new RequestResults<>();
-        requestResults.setOnRequestSuccess(response -> signIn(username, password));
-        requestResults.setOnRequestFail(errorLabel::setValue);
+        requestResults.setOnRequestSuccess(response -> signUpSuccess(username, password));
+        requestResults.setOnRequestFail(this::signUpFail);
         userService.signUp(requestResults, username, password);
+    }
+
+    private void signUpSuccess(String username, String password) {
+        log.info(String.format("Sign up successful for user %s", username));
+        signIn(username, password);
+    }
+
+    private void signUpFail(String errorMessage) {
+        log.info(String.format("Sign up failed: %s", errorMessage));
+        errorLabel.setValue(errorMessage);
     }
 
     private void signIn(String username, String password) {

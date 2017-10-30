@@ -23,6 +23,7 @@ public class RestRequest<T> extends Request<T> {
         this.url = url;
         this.headers = new LinkedMultiValueMap<>();
         this.params = new HashMap<>();
+        addDefaultHeaders();
     }
 
     public void addHeader(String key, String value) {
@@ -55,5 +56,9 @@ public class RestRequest<T> extends Request<T> {
 
     public Object getBody() {
         return body;
+    }
+
+    private void addDefaultHeaders() {
+        addHeader("Accept", "application/json");
     }
 }

@@ -7,4 +7,12 @@ public class UploadedFile extends BaseEntity {
     public String getName() {
         return name;
     }
+
+    @Override
+    public String toString() {
+        return "UploadedFile{" +
+                "id=" + getId() + ", " +
+                "name='" + name + '\'' +
+                '}';
+    }
 }
