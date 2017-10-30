@@ -62,6 +62,6 @@ public class SignInForm extends VerticalLayout {
 
     private void signInFail(String errorMessage) {
         log.info(String.format("Sign in failed: %s", errorMessage));
-        Notification.show("Failed to sign in: " + errorMessage);
+        Notification.show(errorMessage);
     }
 }

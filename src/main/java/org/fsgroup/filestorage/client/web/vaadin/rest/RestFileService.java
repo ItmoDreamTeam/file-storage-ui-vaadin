@@ -27,7 +27,8 @@ public class RestFileService implements FileService {
     @Override
     public void upload(RequestResults<?> requestResults, UserCredentials userCredentials) {
         log.info(String.format("Upload file"));
-        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.POST, urls.file(userCredentials.getUsername()));
+        String url = urls.file(userCredentials.getUsername());
+        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.POST, url);
         auth.addAuthHeader(request, userCredentials);
         requestExecutor.execute(request);
         log.info("Upload file done");
@@ -36,7 +37,8 @@ public class RestFileService implements FileService {
     @Override
     public void download(RequestResults<?> requestResults, UserCredentials userCredentials, int fileId) {
         log.info(String.format("Download file: user=%s, fileId=%d", userCredentials.getUsername(), fileId));
-        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.GET, urls.file(userCredentials.getUsername(), fileId));
+        String url = urls.file(userCredentials.getUsername(), fileId);
+        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.GET, url);
         auth.addAuthHeader(request, userCredentials);
         requestExecutor.execute(request);
         log.info("Download file done");
@@ -45,8 +47,9 @@ public class RestFileService implements FileService {
     @Override
     public void edit(RequestResults<?> requestResults, UserCredentials userCredentials, int fileId, String name) {
         log.info(String.format("Edit file: user=%s, fileId=%d", userCredentials.getUsername(), fileId));
-        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.PUT, urls.file(userCredentials.getUsername(), fileId));
-        request.addParameter("name", name);
+        String url = urls.file(userCredentials.getUsername(), fileId);
+        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.PUT, url);
+        //request.addParameter("name", name);
         auth.addAuthHeader(request, userCredentials);
         requestExecutor.execute(request);
         log.info("Edit file done");
@@ -55,7 +58,8 @@ public class RestFileService implements FileService {
     @Override
     public void delete(RequestResults<?> requestResults, UserCredentials userCredentials, int fileId) {
         log.info(String.format("Delete file: user=%s, fileId=%d", userCredentials.getUsername(), fileId));
-        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.DELETE, urls.file(userCredentials.getUsername(), fileId));
+        String url = urls.file(userCredentials.getUsername(), fileId);
+        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.DELETE, url);
         auth.addAuthHeader(request, userCredentials);
         requestExecutor.execute(request);
         log.info("Delete file done");

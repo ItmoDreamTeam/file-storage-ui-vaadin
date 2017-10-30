@@ -25,21 +25,19 @@ public class SignUpForm extends VerticalLayout {
     private TextField usernameField;
     private PasswordField passwordField;
     private PasswordField repeatPasswordField;
-    private Label errorLabel;
     private Button signUpButton;
 
     public SignUpForm() {
         usernameField = new TextField("Username:");
         passwordField = new PasswordField("Password:");
         repeatPasswordField = new PasswordField("Repeat password:");
-        errorLabel = new Label();
         signUpButton = new Button("Sign Up", clickEvent -> signUp());
         setDefaultComponentAlignment(Alignment.MIDDLE_CENTER);
     }
 
     @PostConstruct
     public void init() {
-        addComponents(usernameField, passwordField, repeatPasswordField, errorLabel, signUpButton);
+        addComponents(usernameField, passwordField, repeatPasswordField, signUpButton);
     }
 
     public void refresh() {
@@ -53,6 +51,7 @@ public class SignUpForm extends VerticalLayout {
         String password = passwordField.getValue();
         String repeatedPassword = repeatPasswordField.getValue();
         if (!password.equals(repeatedPassword)) {
+            passwordField.clear();
             repeatPasswordField.clear();
             Notification.show("Passwords don't match");
             return;
@@ -70,7 +69,7 @@ public class SignUpForm extends VerticalLayout {
 
     private void signUpFail(String errorMessage) {
         log.info(String.format("Sign up failed: %s", errorMessage));
-        errorLabel.setValue(errorMessage);
+        Notification.show(errorMessage);
     }
 
     private void signIn(String username, String password) {

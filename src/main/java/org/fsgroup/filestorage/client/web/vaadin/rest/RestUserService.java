@@ -28,9 +28,8 @@ public class RestUserService implements UserService {
     @Override
     public void signUp(RequestResults<?> requestResults, String username, String password) {
         log.info(String.format("Sign up: %s", username));
-        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.POST, urls.signUp());
-        request.addParameter("username", username);
-        request.addParameter("password", password);
+        String url = urls.signUp(username, password);
+        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.POST, url);
         requestExecutor.execute(request);
         log.info("Sign up done");
     }
@@ -38,7 +37,8 @@ public class RestUserService implements UserService {
     @Override
     public void get(RequestResults<User> requestResults, UserCredentials userCredentials) {
         log.info(String.format("Get user: %s", userCredentials.getUsername()));
-        RestRequest<User> request = new RestRequest<>(requestResults, HttpMethod.GET, urls.user(userCredentials.getUsername()));
+        String url = urls.user(userCredentials.getUsername());
+        RestRequest<User> request = new RestRequest<>(requestResults, HttpMethod.GET, url);
         auth.addAuthHeader(request, userCredentials);
         requestExecutor.execute(request);
         log.info("Get user done");
@@ -47,8 +47,8 @@ public class RestUserService implements UserService {
     @Override
     public void edit(RequestResults<?> requestResults, UserCredentials userCredentials, String password) {
         log.info(String.format("Edit user: %s", userCredentials.getUsername()));
-        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.PUT, urls.user(userCredentials.getUsername()));
-        request.addParameter("password", password);
+        String url = urls.editUser(userCredentials.getUsername(), password);
+        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.PUT, url);
         auth.addAuthHeader(request, userCredentials);
         requestExecutor.execute(request);
         log.info("Edit user done");
@@ -57,7 +57,8 @@ public class RestUserService implements UserService {
     @Override
     public void delete(RequestResults<?> requestResults, UserCredentials userCredentials) {
         log.info(String.format("Delete user: %s", userCredentials.getUsername()));
-        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.DELETE, urls.user(userCredentials.getUsername()));
+        String url = urls.user(userCredentials.getUsername());
+        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.DELETE, url);
         auth.addAuthHeader(request, userCredentials);
         requestExecutor.execute(request);
         log.info("Delete user done");

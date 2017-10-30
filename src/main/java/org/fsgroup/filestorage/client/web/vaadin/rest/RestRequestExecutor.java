@@ -21,8 +21,7 @@ public class RestRequestExecutor implements RequestExecutor {
         RestResponseErrorHandler errorHandler = new RestResponseErrorHandler();
         RestTemplate restTemplate = buildRestTemplate(errorHandler);
         ResponseEntity<T> response = restTemplate.exchange(request.getUrl(), request.getMethod(),
-                new HttpEntity<>(request.getBody(), request.getHeaders()),
-                request.getResponseType(), request.getParams());
+                new HttpEntity<>(request.getBody(), request.getHeaders()), request.getResponseType());
         if (errorHandler.errorOccurred()) request.fail(errorHandler.getErrorMessage());
         else request.success(response.getBody());
     }

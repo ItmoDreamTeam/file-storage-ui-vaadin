@@ -9,12 +9,16 @@ public class RestApiUrls {
     @Value("${rest.root}")
     private String restRoot;
 
-    public String signUp() {
-        return String.format("%s/signup", restRoot);
+    public String signUp(String username, String password) {
+        return String.format("%s/signup?username=%s&password=%s", restRoot, username, password);
     }
 
     public String user(String username) {
         return String.format("%s/user/%s", restRoot, username);
+    }
+
+    public String editUser(String username, String newPassword) {
+        return String.format("%s/user/%s?password=%s", restRoot, username, newPassword);
     }
 
     public String file(String username) {
