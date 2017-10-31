@@ -13,6 +13,6 @@ public class RestAuthorization {
     private Authorization authorization;
 
     public <T> void addAuthHeader(RestRequest<T> request, UserCredentials userCredentials) {
-        request.addHeader("Authorization", authorization.authString(userCredentials));
+        request.getHeaders().add("Authorization", authorization.authString(userCredentials));
     }
 }

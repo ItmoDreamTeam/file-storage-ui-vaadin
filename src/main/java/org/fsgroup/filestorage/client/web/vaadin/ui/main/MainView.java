@@ -27,6 +27,8 @@ public class MainView extends VerticalLayout implements View {
     @Resource
     private FilesLayout filesLayout;
 
+    private UserCredentials userCredentials;
+
     @PostConstruct
     public void init() {
         addComponents(mainPageHeader, filesLayout);
@@ -38,13 +40,14 @@ public class MainView extends VerticalLayout implements View {
         if (userCredentials == null) {
             UI.getCurrent().getNavigator().navigateTo(Views.ROOT);
         } else {
+            this.userCredentials = userCredentials;
             mainPageHeader.refresh();
             filesLayout.refresh();
-            retrieveUserData(userCredentials);
+            retrieveUserData();
         }
     }
 
-    private void retrieveUserData(UserCredentials userCredentials) {
+    private void retrieveUserData() {
         RequestResults<User> requestResults = new RequestResults<>(User.class);
         requestResults.setOnRequestSuccess(response -> refresh(userCredentials, response));
         requestResults.setOnRequestFail(this::failToRetrieveData);
@@ -52,7 +55,7 @@ public class MainView extends VerticalLayout implements View {
     }
 
     private void refresh(UserCredentials userCredentials, User user) {
-        mainPageHeader.refresh(user);
+        mainPageHeader.refresh(userCredentials, user);
         filesLayout.refresh(userCredentials, user);
     }
 

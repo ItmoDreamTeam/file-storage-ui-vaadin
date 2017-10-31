@@ -2,27 +2,25 @@ package org.fsgroup.filestorage.client.web.vaadin.rest;
 
 import org.fsgroup.filestorage.client.web.vaadin.service.Request;
 import org.fsgroup.filestorage.client.web.vaadin.service.RequestResults;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.http.MediaType;
+
+import java.util.Collections;
 
 public class RestRequest<T> extends Request<T> {
 
     private final HttpMethod method;
     private final String url;
-    private final MultiValueMap<String, String> headers;
+    private final HttpHeaders headers;
     private Object body;
 
     public RestRequest(RequestResults<T> requestResults, HttpMethod method, String url) {
         super(requestResults);
         this.method = method;
         this.url = url;
-        this.headers = new LinkedMultiValueMap<>();
+        this.headers = new HttpHeaders();
         addDefaultHeaders();
-    }
-
-    public void addHeader(String key, String value) {
-        headers.add(key, value);
     }
 
     public void setBody(Object body) {
@@ -37,7 +35,7 @@ public class RestRequest<T> extends Request<T> {
         return url;
     }
 
-    public MultiValueMap<String, String> getHeaders() {
+    public HttpHeaders getHeaders() {
         return headers;
     }
 
@@ -46,6 +44,6 @@ public class RestRequest<T> extends Request<T> {
     }
 
     private void addDefaultHeaders() {
-        addHeader("Accept", "application/json");
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
     }
 }
