@@ -3,7 +3,7 @@ package org.fsgroup.filestorage.client.web.vaadin.ui.main;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import org.fsgroup.filestorage.client.web.vaadin.model.User;
@@ -25,16 +25,11 @@ public class MainView extends VerticalLayout implements View {
     private MainPageHeader mainPageHeader;
 
     @Resource
-    private FilesGrid filesGrid;
-
-    public MainView() {
-        setDefaultComponentAlignment(Alignment.TOP_CENTER);
-        setSizeFull();
-    }
+    private FilesLayout filesLayout;
 
     @PostConstruct
     public void init() {
-        addComponents(mainPageHeader, filesGrid);
+        addComponents(mainPageHeader, filesLayout);
     }
 
     @Override
@@ -42,15 +37,26 @@ public class MainView extends VerticalLayout implements View {
         UserCredentials userCredentials = getSession().getAttribute(UserCredentials.class);
         if (userCredentials == null) {
             UI.getCurrent().getNavigator().navigateTo(Views.ROOT);
-            return;
+        } else {
+            mainPageHeader.refresh();
+            filesLayout.refresh();
+            retrieveUserData(userCredentials);
         }
+    }
+
+    private void retrieveUserData(UserCredentials userCredentials) {
         RequestResults<User> requestResults = new RequestResults<>(User.class);
-        requestResults.setOnRequestSuccess(this::refresh);
+        requestResults.setOnRequestSuccess(response -> refresh(userCredentials, response));
+        requestResults.setOnRequestFail(this::failToRetrieveData);
         userService.get(requestResults, userCredentials);
     }
 
-    private void refresh(User user) {
+    private void refresh(UserCredentials userCredentials, User user) {
         mainPageHeader.refresh(user);
-        filesGrid.refresh(user);
+        filesLayout.refresh(userCredentials, user);
+    }
+
+    private void failToRetrieveData(String errorMessage) {
+        Notification.show(errorMessage);
     }
 }

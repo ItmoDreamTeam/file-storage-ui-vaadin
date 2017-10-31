@@ -7,7 +7,7 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import org.fsgroup.filestorage.client.web.vaadin.model.User;
 import org.fsgroup.filestorage.client.web.vaadin.security.UserCredentials;
-import org.fsgroup.filestorage.client.web.vaadin.service.UserService;
+import org.fsgroup.filestorage.client.web.vaadin.service.FileService;
 import org.fsgroup.filestorage.client.web.vaadin.ui.Views;
 
 import javax.annotation.Resource;
@@ -17,7 +17,7 @@ import javax.annotation.Resource;
 public class MainPageHeader extends HorizontalLayout {
 
     @Resource
-    private UserService userService;
+    private FileService fileService;
 
     private Label usernameLabel;
     private Button uploadButton;
@@ -36,10 +36,18 @@ public class MainPageHeader extends HorizontalLayout {
         setComponentAlignment(usernameLabel, Alignment.MIDDLE_LEFT);
         setComponentAlignment(uploadButton, Alignment.MIDDLE_CENTER);
         setComponentAlignment(rightHeaderLayout, Alignment.MIDDLE_RIGHT);
+
+        uploadButton.setEnabled(false);
+        settingsButton.setEnabled(false);
+    }
+
+    public void refresh() {
+        usernameLabel.setVisible(false);
     }
 
     public void refresh(User user) {
-        usernameLabel.setValue(String.format("<h3><b>User:</b> %s</h3>", user.getUsername()));
+        usernameLabel.setVisible(true);
+        usernameLabel.setValue(String.format("<h3>User: <b>%s</b></h3>", user.getUsername()));
     }
 
     private void uploadFile() {
