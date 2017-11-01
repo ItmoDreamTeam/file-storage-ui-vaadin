@@ -38,9 +38,13 @@ public class RestFileService implements FileService {
     public void upload(RequestResults<?> requestResults, File file) {
         Credentials credentials = authenticationService.getUserCredentials();
         log.info(String.format("Upload file, name=%s", file.getName()));
-        String url = urls.file(credentials.getUsername());
-        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.POST, url);
-        addFileToRequest(request, file);
+        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.POST, urls.file(credentials.getUsername()));
+
+        MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+        params.add("file", new FileSystemResource(file));
+        request.setBody(params);
+        request.getHeaders().setContentType(MediaType.MULTIPART_FORM_DATA);
+
         authorizationService.addAuthHeader(request.getHeaders());
         requestExecutor.execute(request);
         log.info("Upload file done");
@@ -50,8 +54,7 @@ public class RestFileService implements FileService {
     public void download(RequestResults<?> requestResults, int fileId) {
         Credentials credentials = authenticationService.getUserCredentials();
         log.info(String.format("Download file: user=%s, fileId=%d", credentials.getUsername(), fileId));
-        String url = urls.file(credentials.getUsername(), fileId);
-        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.GET, url);
+        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.GET, urls.file(credentials.getUsername(), fileId));
         authorizationService.addAuthHeader(request.getHeaders());
         requestExecutor.execute(request);
         log.info("Download file done");
@@ -61,17 +64,9 @@ public class RestFileService implements FileService {
     public void delete(RequestResults<?> requestResults, int fileId) {
         Credentials credentials = authenticationService.getUserCredentials();
         log.info(String.format("Delete file: user=%s, fileId=%d", credentials.getUsername(), fileId));
-        String url = urls.file(credentials.getUsername(), fileId);
-        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.DELETE, url);
+        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.DELETE, urls.file(credentials.getUsername(), fileId));
         authorizationService.addAuthHeader(request.getHeaders());
         requestExecutor.execute(request);
         log.info("Delete file done");
-    }
-
-    private static void addFileToRequest(RestRequest<?> request, File file) {
-        MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
-        params.add("file", new FileSystemResource(file));
-        request.setBody(params);
-        request.getHeaders().setContentType(MediaType.MULTIPART_FORM_DATA);
     }
 }

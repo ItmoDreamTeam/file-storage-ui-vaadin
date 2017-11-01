@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.UUID;
 
 @Service
 public class FileUploader implements Upload.Receiver {
@@ -18,7 +17,7 @@ public class FileUploader implements Upload.Receiver {
 
     public FileUploader() {
         try {
-            file = File.createTempFile("" + UUID.randomUUID(), "");
+            file = File.createTempFile("zebra", "");
         } catch (Exception e) {
             log.error("TempFile creation failed", e);
             throw new RuntimeException(e);

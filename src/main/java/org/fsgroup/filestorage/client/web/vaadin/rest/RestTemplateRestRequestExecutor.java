@@ -2,6 +2,7 @@ package org.fsgroup.filestorage.client.web.vaadin.rest;
 
 import org.fsgroup.filestorage.client.web.vaadin.service.Request;
 import org.fsgroup.filestorage.client.web.vaadin.service.RequestExecutor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -9,7 +10,8 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class RestRequestExecutor implements RequestExecutor {
+@Primary
+public class RestTemplateRestRequestExecutor implements RequestExecutor {
 
     @Override
     public <T> void execute(Request<T> request) {
