@@ -1,7 +1,9 @@
 package org.fsgroup.filestorage.client.web.vaadin.rest;
 
 import org.apache.log4j.Logger;
-import org.fsgroup.filestorage.client.web.vaadin.security.UserCredentials;
+import org.fsgroup.filestorage.client.web.vaadin.auth.AuthenticationService;
+import org.fsgroup.filestorage.client.web.vaadin.auth.AuthorizationService;
+import org.fsgroup.filestorage.client.web.vaadin.auth.Credentials;
 import org.fsgroup.filestorage.client.web.vaadin.service.FileService;
 import org.fsgroup.filestorage.client.web.vaadin.service.RequestExecutor;
 import org.fsgroup.filestorage.client.web.vaadin.service.RequestResults;
@@ -24,38 +26,44 @@ public class RestFileService implements FileService {
     private RestApiUrls urls;
 
     @Resource
-    private RestAuthorization auth;
+    private AuthenticationService authenticationService;
+
+    @Resource
+    private AuthorizationService authorizationService;
 
     @Resource
     private RequestExecutor requestExecutor;
 
     @Override
-    public void upload(RequestResults<?> requestResults, UserCredentials userCredentials, File file) {
+    public void upload(RequestResults<?> requestResults, File file) {
+        Credentials credentials = authenticationService.getUserCredentials();
         log.info(String.format("Upload file, name=%s", file.getName()));
-        String url = urls.file(userCredentials.getUsername());
+        String url = urls.file(credentials.getUsername());
         RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.POST, url);
         addFileToRequest(request, file);
-        auth.addAuthHeader(request, userCredentials);
+        authorizationService.addAuthHeader(request.getHeaders());
         requestExecutor.execute(request);
         log.info("Upload file done");
     }
 
     @Override
-    public void download(RequestResults<?> requestResults, UserCredentials userCredentials, int fileId) {
-        log.info(String.format("Download file: user=%s, fileId=%d", userCredentials.getUsername(), fileId));
-        String url = urls.file(userCredentials.getUsername(), fileId);
+    public void download(RequestResults<?> requestResults, int fileId) {
+        Credentials credentials = authenticationService.getUserCredentials();
+        log.info(String.format("Download file: user=%s, fileId=%d", credentials.getUsername(), fileId));
+        String url = urls.file(credentials.getUsername(), fileId);
         RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.GET, url);
-        auth.addAuthHeader(request, userCredentials);
+        authorizationService.addAuthHeader(request.getHeaders());
         requestExecutor.execute(request);
         log.info("Download file done");
     }
 
     @Override
-    public void delete(RequestResults<?> requestResults, UserCredentials userCredentials, int fileId) {
-        log.info(String.format("Delete file: user=%s, fileId=%d", userCredentials.getUsername(), fileId));
-        String url = urls.file(userCredentials.getUsername(), fileId);
+    public void delete(RequestResults<?> requestResults, int fileId) {
+        Credentials credentials = authenticationService.getUserCredentials();
+        log.info(String.format("Delete file: user=%s, fileId=%d", credentials.getUsername(), fileId));
+        String url = urls.file(credentials.getUsername(), fileId);
         RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.DELETE, url);
-        auth.addAuthHeader(request, userCredentials);
+        authorizationService.addAuthHeader(request.getHeaders());
         requestExecutor.execute(request);
         log.info("Delete file done");
     }

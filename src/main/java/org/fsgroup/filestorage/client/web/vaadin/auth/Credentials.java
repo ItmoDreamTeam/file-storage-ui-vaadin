@@ -1,11 +1,11 @@
-package org.fsgroup.filestorage.client.web.vaadin.security;
+package org.fsgroup.filestorage.client.web.vaadin.auth;
 
-public class UserCredentials {
+public class Credentials {
 
     private final String username;
     private final String password;
 
-    public UserCredentials(String username, String password) {
+    public Credentials(String username, String password) {
         this.username = username;
         this.password = password;
     }

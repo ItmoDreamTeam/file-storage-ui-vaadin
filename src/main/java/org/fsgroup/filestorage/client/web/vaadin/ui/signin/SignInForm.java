@@ -1,12 +1,12 @@
 package org.fsgroup.filestorage.client.web.vaadin.ui.signin;
 
-import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import org.apache.log4j.Logger;
+import org.fsgroup.filestorage.client.web.vaadin.auth.AuthenticationService;
+import org.fsgroup.filestorage.client.web.vaadin.auth.Credentials;
 import org.fsgroup.filestorage.client.web.vaadin.model.User;
-import org.fsgroup.filestorage.client.web.vaadin.security.UserCredentials;
 import org.fsgroup.filestorage.client.web.vaadin.service.RequestResults;
 import org.fsgroup.filestorage.client.web.vaadin.service.UserService;
 import org.fsgroup.filestorage.client.web.vaadin.ui.Views;
@@ -19,6 +19,9 @@ import javax.annotation.Resource;
 public class SignInForm extends VerticalLayout {
 
     private static final Logger log = Logger.getLogger(SignInForm.class);
+
+    @Resource
+    private AuthenticationService authenticationService;
 
     @Resource
     private UserService userService;
@@ -45,23 +48,17 @@ public class SignInForm extends VerticalLayout {
     }
 
     private void signIn() {
-        String username = usernameField.getValue();
-        String password = passwordField.getValue();
-        UserCredentials userCredentials = new UserCredentials(username, password);
+        Credentials credentials = new Credentials(usernameField.getValue(), passwordField.getValue());
+        authenticationService.authenticate(credentials);
         RequestResults<User> requestResults = new RequestResults<>(User.class);
-        requestResults.setOnRequestSuccess(response -> signInSuccess(userCredentials));
+        requestResults.setOnRequestSuccess(response -> UI.getCurrent().getNavigator().navigateTo(Views.ROOT));
         requestResults.setOnRequestFail(this::signInFail);
-        userService.get(requestResults, userCredentials);
-    }
-
-    private void signInSuccess(UserCredentials userCredentials) {
-        log.info(String.format("Sign in successful for user %s", userCredentials.getUsername()));
-        VaadinSession.getCurrent().setAttribute(UserCredentials.class, userCredentials);
-        UI.getCurrent().getNavigator().navigateTo(Views.ROOT);
+        userService.get(requestResults);
     }
 
     private void signInFail(String errorMessage) {
         log.info(String.format("Sign in failed: %s", errorMessage));
+        authenticationService.clear();
         Notification.show(errorMessage);
     }
 }

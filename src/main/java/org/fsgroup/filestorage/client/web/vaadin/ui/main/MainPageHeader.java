@@ -1,12 +1,11 @@
 package org.fsgroup.filestorage.client.web.vaadin.ui.main;
 
-import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
+import org.fsgroup.filestorage.client.web.vaadin.auth.AuthenticationService;
 import org.fsgroup.filestorage.client.web.vaadin.model.User;
-import org.fsgroup.filestorage.client.web.vaadin.security.UserCredentials;
 import org.fsgroup.filestorage.client.web.vaadin.service.FileService;
 import org.fsgroup.filestorage.client.web.vaadin.service.FileUploader;
 import org.fsgroup.filestorage.client.web.vaadin.service.RequestResults;
@@ -20,12 +19,16 @@ import javax.annotation.Resource;
 public class MainPageHeader extends HorizontalLayout {
 
     @Resource
+    private AuthenticationService authenticationService;
+
+    @Resource
     private FileService fileService;
 
     @Resource
     private FileUploader fileUploader;
 
-    private UserCredentials userCredentials;
+    @Resource
+    private FilesLayout filesLayout;
 
     private Label usernameLabel;
     private Upload upload;
@@ -34,8 +37,10 @@ public class MainPageHeader extends HorizontalLayout {
     private HorizontalLayout rightPanel;
 
     public MainPageHeader() {
-        usernameLabel = new Label("User", ContentMode.HTML);
+        usernameLabel = new Label();
+        usernameLabel.setContentMode(ContentMode.HTML);
         upload = new Upload();
+        upload.setButtonCaption("Upload File");
         settingsButton = new Button("Settings",
                 clickEvent -> UI.getCurrent().getNavigator().navigateTo(Views.SETTINGS));
         signOutButton = new Button("Sign Out",
@@ -56,25 +61,23 @@ public class MainPageHeader extends HorizontalLayout {
                 Notification.show(String.format("Unable to upload file: %s", failedEvent.getReason().getMessage())));
     }
 
-    public void refresh() {
-        usernameLabel.setVisible(false);
+    public void clear() {
+        usernameLabel.setValue("...");
     }
 
-    public void refresh(UserCredentials userCredentials, User user) {
-        this.userCredentials = userCredentials;
-        usernameLabel.setVisible(true);
+    public void setData(User user) {
         usernameLabel.setValue(String.format("<h3>User: <b>%s</b></h3>", user.getUsername()));
+    }
+
+    private void signOut() {
+        authenticationService.clear();
+        UI.getCurrent().getNavigator().navigateTo(Views.ROOT);
     }
 
     private void uploadFile() {
         RequestResults<?> requestResults = new RequestResults<>();
-        requestResults.setOnRequestSuccess(response -> Notification.show("File uploaded to server"));
+        requestResults.setOnRequestSuccess(response -> filesLayout.refresh());
         requestResults.setOnRequestFail(Notification::show);
-        fileService.upload(requestResults, userCredentials, fileUploader.getFile());
-    }
-
-    private void signOut() {
-        VaadinSession.getCurrent().setAttribute(UserCredentials.class, null);
-        UI.getCurrent().getNavigator().navigateTo(Views.ROOT);
+        fileService.upload(requestResults, fileUploader.getFile());
     }
 }

@@ -1,11 +1,11 @@
 package org.fsgroup.filestorage.client.web.vaadin.ui.signup;
 
-import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
 import org.apache.log4j.Logger;
-import org.fsgroup.filestorage.client.web.vaadin.security.UserCredentials;
+import org.fsgroup.filestorage.client.web.vaadin.auth.AuthenticationService;
+import org.fsgroup.filestorage.client.web.vaadin.auth.Credentials;
 import org.fsgroup.filestorage.client.web.vaadin.service.RequestResults;
 import org.fsgroup.filestorage.client.web.vaadin.service.UserService;
 import org.fsgroup.filestorage.client.web.vaadin.ui.Views;
@@ -18,6 +18,9 @@ import javax.annotation.Resource;
 public class SignUpForm extends VerticalLayout {
 
     private static final Logger log = Logger.getLogger(SignUpForm.class);
+
+    @Resource
+    private AuthenticationService authenticationService;
 
     @Resource
     private UserService userService;
@@ -54,12 +57,12 @@ public class SignUpForm extends VerticalLayout {
             passwordField.clear();
             repeatPasswordField.clear();
             Notification.show("Passwords don't match");
-            return;
+        } else {
+            RequestResults<?> requestResults = new RequestResults<>();
+            requestResults.setOnRequestSuccess(response -> signUpSuccess(username, password));
+            requestResults.setOnRequestFail(this::signUpFail);
+            userService.signUp(requestResults, username, password);
         }
-        RequestResults<?> requestResults = new RequestResults<>();
-        requestResults.setOnRequestSuccess(response -> signUpSuccess(username, password));
-        requestResults.setOnRequestFail(this::signUpFail);
-        userService.signUp(requestResults, username, password);
     }
 
     private void signUpSuccess(String username, String password) {
@@ -73,8 +76,8 @@ public class SignUpForm extends VerticalLayout {
     }
 
     private void signIn(String username, String password) {
-        UserCredentials userCredentials = new UserCredentials(username, password);
-        VaadinSession.getCurrent().setAttribute(UserCredentials.class, userCredentials);
+        Credentials credentials = new Credentials(username, password);
+        authenticationService.authenticate(credentials);
         UI.getCurrent().getNavigator().navigateTo(Views.ROOT);
     }
 }

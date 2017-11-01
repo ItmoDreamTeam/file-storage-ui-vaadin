@@ -8,9 +8,9 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
 import org.fsgroup.filestorage.client.web.vaadin.model.UploadedFile;
 import org.fsgroup.filestorage.client.web.vaadin.model.User;
-import org.fsgroup.filestorage.client.web.vaadin.security.UserCredentials;
 import org.fsgroup.filestorage.client.web.vaadin.service.FileService;
 import org.fsgroup.filestorage.client.web.vaadin.service.RequestResults;
+import org.fsgroup.filestorage.client.web.vaadin.service.UserService;
 
 import javax.annotation.Resource;
 import java.util.stream.Collectors;
@@ -20,6 +20,9 @@ import java.util.stream.Collectors;
 public class FilesLayout extends VerticalLayout {
 
     @Resource
+    private UserService userService;
+
+    @Resource
     private FileService fileService;
 
     public FilesLayout() {
@@ -27,26 +30,32 @@ public class FilesLayout extends VerticalLayout {
         setSizeFull();
     }
 
-    public void refresh() {
+    public void clear() {
         removeAllComponents();
     }
 
-    public void refresh(UserCredentials userCredentials, User user) {
-        addComponents(
-                user.getFiles().stream()
-                        .map(file -> new FileRow(file, fileToDownload -> download(userCredentials, fileToDownload),
-                                (fileToDelete, fileRow) -> delete(userCredentials, fileToDelete, fileRow)))
-                        .collect(Collectors.toList()).toArray(new FileRow[user.getFiles().size()])
+    public void setData(User user) {
+        clear();
+        addComponents(user.getFiles().stream()
+                .map(file -> new FileRow(file, this::download, this::delete))
+                .collect(Collectors.toList()).toArray(new FileRow[user.getFiles().size()])
         );
     }
 
-    private void download(UserCredentials userCredentials, UploadedFile file) {
+    public void refresh() {
+        RequestResults<User> requestResults = new RequestResults<>(User.class);
+        requestResults.setOnRequestSuccess(this::setData);
+        requestResults.setOnRequestFail(Notification::show);
+        userService.get(requestResults);
     }
 
-    private void delete(UserCredentials userCredentials, UploadedFile file, Component fileRow) {
+    private void download(UploadedFile file) {
+    }
+
+    private void delete(UploadedFile file, Component fileRow) {
         RequestResults<?> requestResults = new RequestResults<>();
         requestResults.setOnRequestSuccess(response -> removeComponent(fileRow));
         requestResults.setOnRequestFail(Notification::show);
-        fileService.delete(requestResults, userCredentials, file.getId());
+        fileService.delete(requestResults, file.getId());
     }
 }
