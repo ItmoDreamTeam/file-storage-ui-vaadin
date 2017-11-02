@@ -33,19 +33,21 @@ public class RestResponseErrorHandler extends DefaultResponseErrorHandler {
         return errorMessage;
     }
 
-    private String deserializeMessage(InputStream inputStream) {
+    private static String deserializeMessage(InputStream inputStream) {
         String content = streamToString(inputStream);
         log.info(String.format("Response: %s", content));
-        ObjectMapper om = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
+        ErrorMessage errorMessage;
         try {
-            return om.readTree(content).findValue("message").asText(UNKNOWN_ERROR);
+            errorMessage = objectMapper.readValue(content, ErrorMessage.class);
         } catch (Exception e) {
             log.warn("Error wasn't recognized (no json property 'message')");
             return UNKNOWN_ERROR;
         }
+        return errorMessage.toString();
     }
 
-    private String streamToString(InputStream inputStream) {
+    private static String streamToString(InputStream inputStream) {
         Scanner scanner = new Scanner(inputStream);
         StringBuilder string = new StringBuilder();
         while (scanner.hasNext())

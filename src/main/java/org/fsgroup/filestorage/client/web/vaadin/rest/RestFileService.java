@@ -1,10 +1,12 @@
 package org.fsgroup.filestorage.client.web.vaadin.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
 import org.fsgroup.filestorage.client.web.vaadin.auth.AuthenticationService;
 import org.fsgroup.filestorage.client.web.vaadin.auth.AuthorizationService;
 import org.fsgroup.filestorage.client.web.vaadin.auth.Credentials;
 import org.fsgroup.filestorage.client.web.vaadin.service.FileService;
+import org.fsgroup.filestorage.client.web.vaadin.service.OnRequestFail;
 import org.fsgroup.filestorage.client.web.vaadin.service.RequestExecutor;
 import org.fsgroup.filestorage.client.web.vaadin.service.RequestResults;
 import org.springframework.core.io.FileSystemResource;
@@ -40,6 +42,34 @@ public class RestFileService implements FileService {
     private RequestExecutor requestExecutor;
 
     @Override
+    public InputStream download(OnRequestFail onRequestFail, int fileId) {
+        Credentials credentials = authenticationService.getUserCredentials();
+        log.info(String.format("Download file: user=%s, fileId=%d", credentials.getUsername(), fileId));
+        try {
+            URL url = new URL(urls.file(credentials.getUsername(), fileId));
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty(HttpHeaders.AUTHORIZATION, authorizationService.authString());
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpStatus.OK.value()) {
+                log.info("Download file done successfully");
+                return connection.getInputStream();
+            } else {
+                ObjectMapper objectMapper = new ObjectMapper();
+                ErrorMessage errorMessage = objectMapper.readValue(connection.getErrorStream(), ErrorMessage.class);
+                onRequestFail.onFail(errorMessage.getMessage());
+                log.warn(String.format("Error while downloading file: response code = %d, message = %s",
+                        responseCode, errorMessage));
+                return null;
+            }
+        } catch (Exception e) {
+            log.warn(String.format("Error while downloading file: %s", e.getMessage()));
+            return null;
+        }
+    }
+
+    @Override
     public void upload(RequestResults<?> requestResults, File file) {
         Credentials credentials = authenticationService.getUserCredentials();
         log.info(String.format("Upload file, name=%s", file.getName()));
@@ -53,31 +83,6 @@ public class RestFileService implements FileService {
         authorizationService.addAuthHeader(request.getHeaders());
         requestExecutor.execute(request);
         log.info("Upload file done");
-    }
-
-    @Override
-    public InputStream download(RequestResults<?> requestResults, int fileId) {
-        Credentials credentials = authenticationService.getUserCredentials();
-        log.info(String.format("Download file: user=%s, fileId=%d", credentials.getUsername(), fileId));
-        InputStream fileStream;
-        try {
-            URL url = new URL(urls.file(credentials.getUsername(), fileId));
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty(HttpHeaders.AUTHORIZATION, authorizationService.authString());
-
-            if (connection.getResponseCode() == HttpStatus.OK.value()) {
-                fileStream = connection.getInputStream();
-            } else {
-                log.error("Error while downloading file: response code = " + connection.getResponseCode());
-                throw new RuntimeException();
-            }
-        } catch (Exception e) {
-            log.error("Error while downloading file", e);
-            throw new RuntimeException(e);
-        }
-        log.info("Download file done");
-        return fileStream;
     }
 
     @Override

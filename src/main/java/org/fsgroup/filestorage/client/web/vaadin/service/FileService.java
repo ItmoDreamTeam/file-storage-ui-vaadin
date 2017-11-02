@@ -8,9 +8,9 @@ import java.io.InputStream;
 @Service
 public interface FileService {
 
-    void upload(RequestResults<?> requestResults, File file);
+    InputStream download(OnRequestFail onRequestFail, int fileId);
 
-    InputStream download(RequestResults<?> requestResults, int fileId);
+    void upload(RequestResults<?> requestResults, File file);
 
     void delete(RequestResults<?> requestResults, int fileId);
 }

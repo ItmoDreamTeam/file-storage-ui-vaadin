@@ -53,11 +53,9 @@ public class FilesLayout extends VerticalLayout {
         userService.get(requestResults);
     }
 
-    //TODO
     private InputStream download(UploadedFile file) {
-        RequestResults<String> requestResults = new RequestResults<>(String.class);
-        requestResults.setOnRequestFail(Notification::show);
-        return fileService.download(requestResults, file.getId());
+        return fileService.download(errorMessage -> Notification.show(errorMessage, Notification.Type.WARNING_MESSAGE),
+                file.getId());
     }
 
     private void delete(UploadedFile file, Component fileRow) {
