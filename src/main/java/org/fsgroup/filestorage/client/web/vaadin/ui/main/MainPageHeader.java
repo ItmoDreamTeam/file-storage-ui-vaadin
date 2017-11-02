@@ -4,6 +4,7 @@ import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.*;
+import org.apache.log4j.Logger;
 import org.fsgroup.filestorage.client.web.vaadin.auth.AuthenticationService;
 import org.fsgroup.filestorage.client.web.vaadin.model.User;
 import org.fsgroup.filestorage.client.web.vaadin.service.FileService;
@@ -17,6 +18,8 @@ import javax.annotation.Resource;
 @UIScope
 @SpringComponent
 public class MainPageHeader extends HorizontalLayout {
+
+    private static final Logger log = Logger.getLogger(MainPageHeader.class);
 
     @Resource
     private AuthenticationService authenticationService;
@@ -74,6 +77,7 @@ public class MainPageHeader extends HorizontalLayout {
         UI.getCurrent().getNavigator().navigateTo(Views.ROOT);
     }
 
+    //TODO
     private void uploadFile() {
         RequestResults<?> requestResults = new RequestResults<>();
         requestResults.setOnRequestSuccess(response -> filesLayout.refresh());

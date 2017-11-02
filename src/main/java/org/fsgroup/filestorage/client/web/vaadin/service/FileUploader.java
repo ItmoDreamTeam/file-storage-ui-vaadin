@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.OutputStream;
 
 @Service
@@ -13,28 +12,12 @@ public class FileUploader implements Upload.Receiver {
 
     private static final Logger log = Logger.getLogger(FileUploader.class);
 
-    private final File file;
-
-    public FileUploader() {
-        try {
-            file = File.createTempFile("zebra", "");
-        } catch (Exception e) {
-            log.error("TempFile creation failed", e);
-            throw new RuntimeException(e);
-        }
-    }
-
     @Override
     public OutputStream receiveUpload(String filename, String mimeType) {
-        try {
-            return new FileOutputStream(file);
-        } catch (Exception e) {
-            log.error("error while receiving upload", e);
-            throw new RuntimeException(e);
-        }
+        return null;
     }
 
     public File getFile() {
-        return file;
+        return null;
     }
 }

@@ -8,7 +8,9 @@ import org.fsgroup.filestorage.client.web.vaadin.service.FileService;
 import org.fsgroup.filestorage.client.web.vaadin.service.RequestExecutor;
 import org.fsgroup.filestorage.client.web.vaadin.service.RequestResults;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -16,6 +18,9 @@ import org.springframework.util.MultiValueMap;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 @Service
 public class RestFileService implements FileService {
@@ -51,13 +56,28 @@ public class RestFileService implements FileService {
     }
 
     @Override
-    public void download(RequestResults<?> requestResults, int fileId) {
+    public InputStream download(RequestResults<?> requestResults, int fileId) {
         Credentials credentials = authenticationService.getUserCredentials();
         log.info(String.format("Download file: user=%s, fileId=%d", credentials.getUsername(), fileId));
-        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.GET, urls.file(credentials.getUsername(), fileId));
-        authorizationService.addAuthHeader(request.getHeaders());
-        requestExecutor.execute(request);
+        InputStream fileStream;
+        try {
+            URL url = new URL(urls.file(credentials.getUsername(), fileId));
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty(HttpHeaders.AUTHORIZATION, authorizationService.authString());
+
+            if (connection.getResponseCode() == HttpStatus.OK.value()) {
+                fileStream = connection.getInputStream();
+            } else {
+                log.error("Error while downloading file: response code = " + connection.getResponseCode());
+                throw new RuntimeException();
+            }
+        } catch (Exception e) {
+            log.error("Error while downloading file", e);
+            throw new RuntimeException(e);
+        }
         log.info("Download file done");
+        return fileStream;
     }
 
     @Override

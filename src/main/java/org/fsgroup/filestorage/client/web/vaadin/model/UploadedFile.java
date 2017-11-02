@@ -3,9 +3,14 @@ package org.fsgroup.filestorage.client.web.vaadin.model;
 public class UploadedFile extends BaseEntity {
 
     private String name;
+    private String size;
 
     public String getName() {
         return name;
+    }
+
+    public String getSize() {
+        return size;
     }
 
     @Override

@@ -14,7 +14,6 @@ import org.fsgroup.filestorage.client.web.vaadin.service.RequestResults;
 import org.fsgroup.filestorage.client.web.vaadin.service.UserService;
 
 import javax.annotation.Resource;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.stream.Collectors;
 
@@ -54,18 +53,11 @@ public class FilesLayout extends VerticalLayout {
         userService.get(requestResults);
     }
 
+    //TODO
     private InputStream download(UploadedFile file) {
         RequestResults<String> requestResults = new RequestResults<>(String.class);
-        requestResults.setOnRequestSuccess(response -> {
-        });
         requestResults.setOnRequestFail(Notification::show);
-        fileService.download(requestResults, file.getId());
-
-        try {
-            return new FileInputStream("times.txt");
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return fileService.download(requestResults, file.getId());
     }
 
     private void delete(UploadedFile file, Component fileRow) {

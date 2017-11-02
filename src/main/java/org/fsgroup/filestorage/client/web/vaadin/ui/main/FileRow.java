@@ -26,7 +26,7 @@ public class FileRow extends HorizontalLayout {
         this.onFileDownload = onFileDownload;
         this.onFileDelete = onFileDelete;
         this.fileNameLabel = new Label(file.getName());
-        this.sizeLabel = new Label("* MB");
+        this.sizeLabel = new Label(file.getSize());
         this.uploadedDateLabel = new Label(file.getCreated().toString());
         this.downloadFileButton = new Button("\u2B73");
         this.deleteFileButton = new Button("\uD83D\uDDD1");
