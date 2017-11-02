@@ -1,10 +1,11 @@
 package org.fsgroup.filestorage.client.web.vaadin.ui.main;
 
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.ui.*;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.VerticalLayout;
 import org.apache.log4j.Logger;
 import org.fsgroup.filestorage.client.web.vaadin.model.UploadedFile;
 import org.fsgroup.filestorage.client.web.vaadin.model.User;
@@ -13,9 +14,8 @@ import org.fsgroup.filestorage.client.web.vaadin.service.RequestResults;
 import org.fsgroup.filestorage.client.web.vaadin.service.UserService;
 
 import javax.annotation.Resource;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
+import java.io.InputStream;
 import java.util.stream.Collectors;
 
 @UIScope
@@ -54,39 +54,18 @@ public class FilesLayout extends VerticalLayout {
         userService.get(requestResults);
     }
 
-    private void download(UploadedFile file) {
-        File tmpFile;
-        try {
-            tmpFile = File.createTempFile("coocoo", "");
-        } catch (Exception e) {
-            log.error("Error: ", e);
-            throw new RuntimeException(e);
-        }
-
+    private InputStream download(UploadedFile file) {
         RequestResults<String> requestResults = new RequestResults<>(String.class);
         requestResults.setOnRequestSuccess(response -> {
-            try {
-                FileWriter fileWriter = new FileWriter(tmpFile);
-                fileWriter.write(response);
-                fileWriter.close();
-            } catch (Exception e) {
-                log.error("Error: ", e);
-            }
         });
         requestResults.setOnRequestFail(Notification::show);
         fileService.download(requestResults, file.getId());
 
-        FileDownloader fileDownloader = new FileDownloader(new StreamResource(() -> {
-            try {
-                return new FileInputStream(tmpFile);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }, file.getName()));
-
-        Button button = new Button("DOWNLOAD");
-        fileDownloader.extend(button);
-        addComponent(button);
+        try {
+            return new FileInputStream("times.txt");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void delete(UploadedFile file, Component fileRow) {
