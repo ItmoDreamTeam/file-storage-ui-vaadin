@@ -56,7 +56,7 @@ public class SignUpForm extends VerticalLayout {
         if (!password.equals(repeatedPassword)) {
             passwordField.clear();
             repeatPasswordField.clear();
-            Notification.show("Passwords don't match");
+            Notification.show("Passwords don't match", Notification.Type.WARNING_MESSAGE);
         } else {
             RequestResults<?> requestResults = new RequestResults<>();
             requestResults.setOnRequestSuccess(response -> signUpSuccess(username, password));
@@ -67,17 +67,14 @@ public class SignUpForm extends VerticalLayout {
 
     private void signUpSuccess(String username, String password) {
         log.info(String.format("Sign up successful for user %s", username));
-        signIn(username, password);
+        Credentials credentials = new Credentials(username, password);
+        authenticationService.authenticate(credentials);
+        UI.getCurrent().getNavigator().navigateTo(Views.ROOT);
+        Notification.show(String.format("Signed in as %s", username), Notification.Type.TRAY_NOTIFICATION);
     }
 
     private void signUpFail(String errorMessage) {
         log.info(String.format("Sign up failed: %s", errorMessage));
-        Notification.show(errorMessage);
-    }
-
-    private void signIn(String username, String password) {
-        Credentials credentials = new Credentials(username, password);
-        authenticationService.authenticate(credentials);
-        UI.getCurrent().getNavigator().navigateTo(Views.ROOT);
+        Notification.show(errorMessage, Notification.Type.WARNING_MESSAGE);
     }
 }

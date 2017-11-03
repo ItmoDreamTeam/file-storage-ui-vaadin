@@ -53,15 +53,17 @@ public class MainPageHeader extends HorizontalLayout {
 
     @PostConstruct
     public void init() {
-        addComponents(usernameLabel, upload, rightPanel);
+        addComponents(usernameLabel, /*upload,*/ rightPanel);
         setWidth(100, Unit.PERCENTAGE);
         setComponentAlignment(usernameLabel, Alignment.MIDDLE_LEFT);
-        setComponentAlignment(upload, Alignment.MIDDLE_CENTER);
+//        setComponentAlignment(upload, Alignment.MIDDLE_CENTER);
         setComponentAlignment(rightPanel, Alignment.MIDDLE_RIGHT);
         upload.setReceiver(fileUploader);
         upload.addSucceededListener(succeededEvent -> uploadFile());
-        upload.addFailedListener(failedEvent ->
-                Notification.show(String.format("Unable to upload file: %s", failedEvent.getReason().getMessage())));
+        upload.addFailedListener(failedEvent -> {
+            log.warn(String.format("Unable to upload file: %s", failedEvent.getReason().getMessage()));
+            Notification.show("Unable to upload file", Notification.Type.ERROR_MESSAGE);
+        });
     }
 
     public void clear() {
@@ -80,8 +82,11 @@ public class MainPageHeader extends HorizontalLayout {
     //TODO
     private void uploadFile() {
         RequestResults<?> requestResults = new RequestResults<>();
-        requestResults.setOnRequestSuccess(response -> filesLayout.refresh());
-        requestResults.setOnRequestFail(Notification::show);
+        requestResults.setOnRequestSuccess(response -> {
+            filesLayout.refresh();
+            Notification.show("File uploaded", Notification.Type.TRAY_NOTIFICATION);
+        });
+        requestResults.setOnRequestFail(errorMessage -> Notification.show(errorMessage, Notification.Type.ERROR_MESSAGE));
         fileService.upload(requestResults, fileUploader.getFile());
     }
 }

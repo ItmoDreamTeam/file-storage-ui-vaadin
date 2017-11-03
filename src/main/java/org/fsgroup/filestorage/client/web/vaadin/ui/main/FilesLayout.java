@@ -49,19 +49,19 @@ public class FilesLayout extends VerticalLayout {
     public void refresh() {
         RequestResults<User> requestResults = new RequestResults<>(User.class);
         requestResults.setOnRequestSuccess(this::setData);
-        requestResults.setOnRequestFail(Notification::show);
+        requestResults.setOnRequestFail(errorMessage -> Notification.show(errorMessage, Notification.Type.ERROR_MESSAGE));
         userService.get(requestResults);
     }
 
     private InputStream download(UploadedFile file) {
-        return fileService.download(errorMessage -> Notification.show(errorMessage, Notification.Type.WARNING_MESSAGE),
+        return fileService.download(errorMessage -> Notification.show(errorMessage, Notification.Type.ERROR_MESSAGE),
                 file.getId());
     }
 
     private void delete(UploadedFile file, Component fileRow) {
         RequestResults<?> requestResults = new RequestResults<>();
         requestResults.setOnRequestSuccess(response -> removeComponent(fileRow));
-        requestResults.setOnRequestFail(Notification::show);
+        requestResults.setOnRequestFail(errorMessage -> Notification.show(errorMessage, Notification.Type.ERROR_MESSAGE));
         fileService.delete(requestResults, file.getId());
     }
 }

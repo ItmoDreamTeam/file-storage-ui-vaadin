@@ -51,14 +51,19 @@ public class SignInForm extends VerticalLayout {
         Credentials credentials = new Credentials(usernameField.getValue(), passwordField.getValue());
         authenticationService.authenticate(credentials);
         RequestResults<User> requestResults = new RequestResults<>(User.class);
-        requestResults.setOnRequestSuccess(response -> UI.getCurrent().getNavigator().navigateTo(Views.ROOT));
+        requestResults.setOnRequestSuccess(this::signInSuccess);
         requestResults.setOnRequestFail(this::signInFail);
         userService.get(requestResults);
+    }
+
+    private void signInSuccess(User user) {
+        UI.getCurrent().getNavigator().navigateTo(Views.ROOT);
+        Notification.show(String.format("Signed in as %s", user.getUsername()), Notification.Type.TRAY_NOTIFICATION);
     }
 
     private void signInFail(String errorMessage) {
         log.info(String.format("Sign in failed: %s", errorMessage));
         authenticationService.clear();
-        Notification.show(errorMessage);
+        Notification.show(errorMessage, Notification.Type.WARNING_MESSAGE);
     }
 }
