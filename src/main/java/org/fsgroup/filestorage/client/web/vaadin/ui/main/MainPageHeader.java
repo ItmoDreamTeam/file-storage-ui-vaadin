@@ -28,10 +28,9 @@ public class MainPageHeader extends HorizontalLayout {
     private FileService fileService;
 
     @Resource
-    private FileUploader fileUploader;
-
-    @Resource
     private FilesLayout filesLayout;
+
+    private FileUploader fileUploader;
 
     private Label usernameLabel;
     private Upload upload;
@@ -41,13 +40,10 @@ public class MainPageHeader extends HorizontalLayout {
 
     public MainPageHeader() {
         usernameLabel = new Label();
-        usernameLabel.setContentMode(ContentMode.HTML);
+        fileUploader = new FileUploader();
         upload = new Upload();
-        upload.setButtonCaption("Upload File");
-        settingsButton = new Button("Settings",
-                clickEvent -> UI.getCurrent().getNavigator().navigateTo(Views.SETTINGS));
-        signOutButton = new Button("Sign Out",
-                clickEvent -> signOut());
+        settingsButton = new Button("Settings", clickEvent -> UI.getCurrent().getNavigator().navigateTo(Views.SETTINGS));
+        signOutButton = new Button("Sign Out", clickEvent -> signOut());
         rightPanel = new HorizontalLayout(settingsButton, signOutButton);
     }
 
@@ -58,6 +54,8 @@ public class MainPageHeader extends HorizontalLayout {
         setComponentAlignment(usernameLabel, Alignment.MIDDLE_LEFT);
         setComponentAlignment(upload, Alignment.MIDDLE_CENTER);
         setComponentAlignment(rightPanel, Alignment.MIDDLE_RIGHT);
+        usernameLabel.setContentMode(ContentMode.HTML);
+        upload.setButtonCaption("Upload File");
         upload.setReceiver(fileUploader);
         upload.addSucceededListener(succeededEvent -> uploadFile());
         upload.addFailedListener(failedEvent -> {
