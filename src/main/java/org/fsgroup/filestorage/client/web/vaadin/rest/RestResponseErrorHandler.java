@@ -12,6 +12,7 @@ import java.util.Scanner;
 public class RestResponseErrorHandler extends DefaultResponseErrorHandler {
 
     private static final Logger log = Logger.getLogger(RestResponseErrorHandler.class);
+    private static final String SERVER_ERROR = "Server error";
     private static final String UNKNOWN_ERROR = "Unknown error";
 
     private boolean errorOccurred = false;
@@ -21,7 +22,11 @@ public class RestResponseErrorHandler extends DefaultResponseErrorHandler {
     public void handleError(ClientHttpResponse response) throws IOException {
         log.info("Rest response informs about an error");
         errorOccurred = true;
-        errorMessage = deserializeMessage(response.getBody());
+        if (response.getStatusCode().is4xxClientError()) {
+            errorMessage = deserializeMessage(response.getBody());
+        } else {
+            errorMessage = SERVER_ERROR;
+        }
         log.info(String.format("Error message: %s", errorMessage));
     }
 

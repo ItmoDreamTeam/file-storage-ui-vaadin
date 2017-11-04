@@ -62,7 +62,7 @@ public class MainPageHeader extends HorizontalLayout {
         upload.addSucceededListener(succeededEvent -> uploadFile());
         upload.addFailedListener(failedEvent -> {
             log.warn(String.format("Unable to upload file: %s", failedEvent.getReason().getMessage()));
-            Notification.show("Unable to upload file", Notification.Type.ERROR_MESSAGE);
+            Notification.show("Unable to upload file", Notification.Type.WARNING_MESSAGE);
         });
     }
 
@@ -86,7 +86,7 @@ public class MainPageHeader extends HorizontalLayout {
             filesLayout.refresh();
             Notification.show("File uploaded", Notification.Type.TRAY_NOTIFICATION);
         });
-        requestResults.setOnRequestFail(errorMessage -> Notification.show(errorMessage, Notification.Type.ERROR_MESSAGE));
+        requestResults.setOnRequestFail(errorMessage -> Notification.show(errorMessage, Notification.Type.WARNING_MESSAGE));
         fileService.upload(requestResults, fileUploader.getFile());
     }
 }

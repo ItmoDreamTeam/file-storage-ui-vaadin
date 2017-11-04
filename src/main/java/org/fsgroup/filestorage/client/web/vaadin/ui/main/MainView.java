@@ -61,6 +61,6 @@ public class MainView extends VerticalLayout implements View {
     private void failToRetrieveData(String errorMessage) {
         authenticationService.clear();
         UI.getCurrent().getNavigator().navigateTo(Views.ROOT);
-        Notification.show(errorMessage, Notification.Type.ERROR_MESSAGE);
+        Notification.show(errorMessage, Notification.Type.WARNING_MESSAGE);
     }
 }
