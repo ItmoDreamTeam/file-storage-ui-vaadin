@@ -9,17 +9,14 @@ import org.fsgroup.filestorage.client.web.vaadin.service.FileService;
 import org.fsgroup.filestorage.client.web.vaadin.service.OnRequestFail;
 import org.fsgroup.filestorage.client.web.vaadin.service.RequestExecutor;
 import org.fsgroup.filestorage.client.web.vaadin.service.RequestResults;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import javax.annotation.Resource;
-import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -70,15 +67,14 @@ public class RestFileService implements FileService {
     }
 
     @Override
-    public void upload(RequestResults<?> requestResults, File file) {
+    public void upload(RequestResults<?> requestResults, String filename, InputStream fileStream) {
         Credentials credentials = authenticationService.getUserCredentials();
-        log.info(String.format("Upload file, name=%s", file.getName()));
+        log.info(String.format("Upload file, name=%s", filename));
         RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.POST, urls.file(credentials.getUsername()));
 
         MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
-        params.add("file", new FileSystemResource(file));
+        params.add("file", new InMemoryResource(filename, fileStream));
         request.setBody(params);
-        request.getHeaders().setContentType(MediaType.MULTIPART_FORM_DATA);
 
         authorizationService.addAuthHeader(request.getHeaders());
         requestExecutor.execute(request);
