@@ -1,8 +1,6 @@
 package org.fsgroup.filestorage.vaadin.rest;
 
-import org.fsgroup.filestorage.vaadin.auth.AuthenticationService;
 import org.fsgroup.filestorage.vaadin.auth.AuthorizationService;
-import org.fsgroup.filestorage.vaadin.auth.Credentials;
 import org.fsgroup.filestorage.vaadin.model.User;
 import org.fsgroup.filestorage.vaadin.service.RequestExecutor;
 import org.fsgroup.filestorage.vaadin.service.RequestResults;
@@ -23,9 +21,6 @@ public class RestUserService implements UserService {
 
     @Resource
     private RestApiUrls urls;
-
-    @Resource
-    private AuthenticationService authenticationService;
 
     @Resource
     private AuthorizationService authorizationService;
@@ -49,9 +44,8 @@ public class RestUserService implements UserService {
 
     @Override
     public void get(RequestResults<User> requestResults) {
-        Credentials credentials = authenticationService.getUserCredentials();
-        log.info(String.format("Get user: %s", credentials.getUsername()));
-        RestRequest<User> request = new RestRequest<>(requestResults, HttpMethod.GET, urls.user(credentials.getUsername()));
+        log.info("Get user");
+        RestRequest<User> request = new RestRequest<>(requestResults, HttpMethod.GET, urls.user());
         authorizationService.addAuthHeader(request.getHeaders());
         requestExecutor.execute(request);
         log.info("Get user done");
@@ -59,9 +53,8 @@ public class RestUserService implements UserService {
 
     @Override
     public void edit(RequestResults<?> requestResults, String password) {
-        Credentials credentials = authenticationService.getUserCredentials();
-        log.info(String.format("Edit user: %s", credentials.getUsername()));
-        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.PUT, urls.user(credentials.getUsername()));
+        log.info("Edit user: %s");
+        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.PUT, urls.user());
         authorizationService.addAuthHeader(request.getHeaders());
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
@@ -74,9 +67,8 @@ public class RestUserService implements UserService {
 
     @Override
     public void delete(RequestResults<?> requestResults) {
-        Credentials credentials = authenticationService.getUserCredentials();
-        log.info(String.format("Delete user: %s", credentials.getUsername()));
-        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.DELETE, urls.user(credentials.getUsername()));
+        log.info("Delete user: %s");
+        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.DELETE, urls.user());
         authorizationService.addAuthHeader(request.getHeaders());
         requestExecutor.execute(request);
         log.info("Delete user done");

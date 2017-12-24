@@ -13,15 +13,15 @@ public class RestApiUrls {
         return String.format("%s/signup", restRoot);
     }
 
-    public String user(String username) {
-        return String.format("%s/user/%s", restRoot, username);
+    public String user() {
+        return String.format("%s/profile", restRoot);
     }
 
-    public String file(String username) {
-        return String.format("%s/user/%s/file", restRoot, username);
+    public String file() {
+        return String.format("%s/files", restRoot);
     }
 
-    public String file(String username, int fileId) {
-        return String.format("%s/user/%s/file/%d", restRoot, username, fileId);
+    public String file(int fileId) {
+        return String.format("%s/files/%d", restRoot, fileId);
     }
 }

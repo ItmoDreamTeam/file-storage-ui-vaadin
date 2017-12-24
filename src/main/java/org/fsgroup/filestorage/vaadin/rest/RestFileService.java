@@ -1,9 +1,7 @@
 package org.fsgroup.filestorage.vaadin.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.fsgroup.filestorage.vaadin.auth.AuthenticationService;
 import org.fsgroup.filestorage.vaadin.auth.AuthorizationService;
-import org.fsgroup.filestorage.vaadin.auth.Credentials;
 import org.fsgroup.filestorage.vaadin.service.FileService;
 import org.fsgroup.filestorage.vaadin.service.OnRequestFail;
 import org.fsgroup.filestorage.vaadin.service.RequestExecutor;
@@ -31,9 +29,6 @@ public class RestFileService implements FileService {
     private RestApiUrls urls;
 
     @Resource
-    private AuthenticationService authenticationService;
-
-    @Resource
     private AuthorizationService authorizationService;
 
     @Resource
@@ -41,10 +36,9 @@ public class RestFileService implements FileService {
 
     @Override
     public InputStream download(OnRequestFail onRequestFail, int fileId) {
-        Credentials credentials = authenticationService.getUserCredentials();
-        log.info(String.format("Download file: user=%s, fileId=%d", credentials.getUsername(), fileId));
+        log.info(String.format("Download file: fileId=%d", fileId));
         try {
-            URL url = new URL(urls.file(credentials.getUsername(), fileId));
+            URL url = new URL(urls.file(fileId));
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty(HttpHeaders.AUTHORIZATION, authorizationService.authString());
@@ -69,9 +63,8 @@ public class RestFileService implements FileService {
 
     @Override
     public void upload(RequestResults<?> requestResults, String filename, InputStream fileStream) {
-        Credentials credentials = authenticationService.getUserCredentials();
         log.info(String.format("Upload file, name=%s", filename));
-        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.POST, urls.file(credentials.getUsername()));
+        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.POST, urls.file());
 
         MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
         params.add("file", new InMemoryResource(filename, fileStream));
@@ -84,9 +77,8 @@ public class RestFileService implements FileService {
 
     @Override
     public void delete(RequestResults<?> requestResults, int fileId) {
-        Credentials credentials = authenticationService.getUserCredentials();
-        log.info(String.format("Delete file: user=%s, fileId=%d", credentials.getUsername(), fileId));
-        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.DELETE, urls.file(credentials.getUsername(), fileId));
+        log.info(String.format("Delete file: fileId=%d", fileId));
+        RestRequest<?> request = new RestRequest<>(requestResults, HttpMethod.DELETE, urls.file(fileId));
         authorizationService.addAuthHeader(request.getHeaders());
         requestExecutor.execute(request);
         log.info("Delete file done");
